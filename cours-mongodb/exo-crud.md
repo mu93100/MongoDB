@@ -79,18 +79,41 @@ réponse terminal
 pour afficher :::
 db.users.find(ObjectId('68357942ac165f81996c4bd0'))
 ```
+
 - Ajouter une nouvelle catégorie (exemple : “Jouets”).
 ```js
 db.categories.insertOne({name: "Jouets"})
 db.categories.find(ObjectId('68357ed5ac165f81996c4bd1') )
 ```
+
 - Ajouter un nouveau produit dans la catégorie “Jouets” avec un stock de 100.
 ```js
 db.products.insertOne({category: "Jouets", name: "ballon", stock: 100})
 db.products.find( ObjectId('683580b3ac165f81996c4bd2'))
 ```
+
 - Ajouter une nouvelle commande pour un utilisateur avec au moins un produit et un total calculé.
 ```js
+db.orders.insertOne({
+  _id: ObjectId('6000000afc13ae6d7e000002'), 
+  userId: ObjectId('6654700cfc13ae6d7e000001'), 
+  products: [ {
+    productId: ObjectId("6654715afc13ae6d7e000002"),
+    quantity: 3
+    }
+    ],
+  total: 99.60,
+  status: "pending",
+  createdAt: new Date(),
+  address: {
+    street: "134",
+    city: "Montreuil",
+    postalCode: "93100",
+    country: "France"
+  }
+  }
+)
+db.orders.find({_id: ObjectId('6000000afc13ae6d7e000002')})
 
 ```
 - Ajouter une review pour un produit existant par un utilisateur existant.
@@ -188,7 +211,10 @@ db.reviews.replaceOne(
 **Objectif** : Supprimer des documents.
 - Supprimer une catégorie “Beauté”.
 ```js
-
+db.categories.deleteOne({
+  name: "Beauté"
+})
+db.categories.find()
 ```
 - Supprimer un produit avec un stock à zéro.
 ```js

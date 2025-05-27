@@ -18,6 +18,14 @@ Une **Read-Only View** (ou simplement View) est une vue virtuelle d’une collec
 
 Une vue est créée à partir d’une requête d’agrégation ($match, $project, etc). Elle est mise à jour dynamiquement : chaque fois qu’on interroge la vue, MongoDB exécute la requête sur les données sources. Elle est en lecture seule : on ne peut pas y faire d’opérations d’écriture (insert, update, delete).
 
+////\
+$match  POUR FAIRE LE TRI ???
+Filtre les documents en fonction d'un prédicat de requête spécifié . Les documents correspondants sont transmis à l'étape suivante du pipeline.
+
+$project  POUR AFFICHER ???
+Transfère les documents contenant les champs demandés à l'étape suivante du pipeline. Les champs spécifiés peuvent être des champs existants des documents d'entrée ou des champs nouvellement calculés.
+////\
+
 Imaginons une collection *orders* :
 ```json
 {
@@ -27,12 +35,26 @@ Imaginons une collection *orders* :
   "status": "validée"
 }
 ```
+
 On peut créer une vue qui montre uniquement les commandes validées :
 ```js
 db.createView("validated_orders", "orders", [
   { $match: { status: "validée" } }
 ])
+
 ```
+////\
+DANS db.createView("validated_orders", "orders", [
+ {$match: { status: "validée" } }
+])
+
+validated_orders === VUE (Nlle)
+orders === la collection d'origine
+$match === pour voir sur quoi on fait le tri/ COMMENT ON FAIT LE TRI
+$project === ce qu'on demande d'afficher
+////\
+
+
 On pourra ensuite faire :
 ```js
 db.validated_orders.find()
@@ -51,13 +73,16 @@ On crée une requête complexe (souvent avec **aggregate**) puis on l’exécute
 
 *Par exemple :*
 ```js
-const pipeline = [
+const pipeline = db.commandes.aggregate([
   { $match: { status: "validée" } },
   { $group: { _id: "$client", total: { $sum: "$amount" } } }
-];
+]).toArray();
 
-const results = db.commandes.aggregate(pipeline).toArray();
-db.views_clients.insertMany(results);
+/*OU ON ECRIT CÔ ça
+ const results = db.commandes.aggregate(pipeline).toArray(); */
+db.views_clients.insertMany(pipeline);
+
+_id: , total:
 ```
 
 Ça a l'avantage d'être très performant à la lecture (car les données sont déjà calculées). On peut indexer cette collection comme n’importe quelle autre. On va l'utiliser pour des tableaux de bord, des rapports, etc.
